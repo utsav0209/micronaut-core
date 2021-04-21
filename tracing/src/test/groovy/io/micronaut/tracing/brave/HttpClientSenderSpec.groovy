@@ -17,7 +17,6 @@ package io.micronaut.tracing.brave
 
 import io.micronaut.context.ApplicationContext
 import io.micronaut.context.event.ApplicationEventListener
-import io.micronaut.core.io.socket.SocketUtils
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.Body
@@ -26,16 +25,13 @@ import io.micronaut.http.annotation.Post
 import io.micronaut.http.client.HttpClient
 import io.micronaut.runtime.server.EmbeddedServer
 import io.micronaut.runtime.server.event.ServerStartupEvent
-import io.micronaut.tracing.brave.sender.HttpClientSender
 import io.reactivex.Flowable
 import io.reactivex.Single
-import spock.lang.Retry
 import spock.lang.Specification
 import spock.util.concurrent.PollingConditions
 import zipkin2.Span
 
 import javax.inject.Singleton
-
 /**
  * @author graemerocher
  * @since 1.0
@@ -58,12 +54,8 @@ class HttpClientSenderSpec extends Specification {
         EmbeddedServer embeddedServer = context.getBean(EmbeddedServer).start()
         HttpClient client = context.createBean(HttpClient, embeddedServer.getURL())
         PollingConditions conditions = new PollingConditions(timeout: 10)
-        // mock Zipkin server
-        EmbeddedServer zipkinServer = ApplicationContext.run(
-                EmbeddedServer,
-                ['micronaut.server.port':9411]
-        )
-        SpanController spanController = zipkinServer.applicationContext.getBean(SpanController)
+
+        when:
         StartedListener listener = zipkinServer.applicationContext.getBean(StartedListener)
 
         then:
@@ -120,6 +112,8 @@ class HttpClientSenderSpec extends Specification {
         HttpClient client = context.createBean(HttpClient, embeddedServer.getURL())
 
         PollingConditions conditions = new PollingConditions(timeout: 10)
+
+        when:
         CustomPathSpanController customPathSpanController = zipkinServer.applicationContext.getBean(CustomPathSpanController)
         StartedListener listener = zipkinServer.applicationContext.getBean(StartedListener)
 
